@@ -42,3 +42,7 @@ tree_tidy <- tree_tidy %>%
 ggplot(tree_tidy, aes(DBH, SLA)) +
   geom_hex(bins=75)
 
+ggplot(tree_tidy, aes(DBH, pred1)) +
+  geom_hex(bins=75) 
+
+
