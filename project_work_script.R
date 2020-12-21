@@ -1,0 +1,12 @@
+library(tidyverse)
+tree_measurements <- read.csv("~/Documents/Coding/statistical-programming/statistical-programming-project-work-2020/tree_measurements.csv")
+tree_variables <- read.csv("~/Documents/Coding/statistical-programming/statistical-programming-project-work-2020/tree_variables.csv")
+tree_measurements <- as_tibble(tree_measurements)
+tree_variables <- as_tibble(tree_variables)
+tree_tidy <- left_join(tree_measurements, tree_variables, by = ("variable_id"))
+tree_tidy <- select(tree_tidy, -variable_id)
+tree_tidy <- tree_tidy %>%
+  pivot_wider(names_from = variable_name, values_from = value)
+model1 <- lm(SLA ~ DBH, data = tree_tidy)
+model2 <- lm(SLA ~ DBH + species, data = tree_tidy)
+model3 <- lm(SLA ~ DBH + species + DBH * species, data = tree_tidy)

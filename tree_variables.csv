@@ -1,0 +1,12 @@
+variable_id,variable_name
+1,DBH
+2,leaf_thickness
+3,leaf_toughness
+4,sapwood_density
+5,N
+6,C_N
+7,N15
+8,C13
+9,chlorophyll_concentration
+10,surface_area
+11,SLA
