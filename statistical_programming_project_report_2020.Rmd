@@ -1,0 +1,109 @@
+---
+title: "Project Work Report"
+author: "Miska Sulander (UTU Studentnumber)"
+date: "12/22/2020"
+output:
+  html_document:
+    df_print: paged
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R-code and explanations
+
+In this assignment the goal was to compare different linear models between DBH and SLA variables of the given dataset tree_measurements.csv. Variables DBH and SLA are as follows:\
+- DBH = tree diameter at breast height (cm)\
+- SLA = specific leaf area (mm2/g), (leaf area/leaf mass)\
+- species = plant species\
+
+SLA is a common estimate of reproductive strategy of plants and according studies for example respond to environmental changes (amount of light etc.)\
+\
+For loading the given data to RStudio and tidying it the following code was used:\
+\
+```{r echo=TRUE}
+library(tidyverse)
+
+# Read required files to environment and convert them to tibbles
+tree_measurements <- read.csv("~/Documents/Coding/statistical-programming-project-work-2020/tree_measurements.csv")
+tree_variables <- read.csv("~/Documents/Coding/statistical-programming-project-work-2020/tree_variables.csv")
+tree_measurements <- as_tibble(tree_measurements)
+tree_variables <- as_tibble(tree_variables)
+
+# Join tree_measurements and tree_variables to tree_tidy based on "variable_id"
+tree_tidy <- left_join(tree_measurements, tree_variables, by = ("variable_id"))
+
+# Remove variable id-column as not needed anymore
+tree_tidy <- select(tree_tidy, -variable_id)
+
+# Change rows containing separate variables from instances of tree as columns in tibble for obtaining cleaner data
+tree_tidy <- tree_tidy %>%
+  pivot_wider(names_from = variable_name, values_from = value)
+
+```
+
+Next three different linear models were build according to given assignment.
+
+```{r echo=TRUE}
+# Make three linear models as instructed, first linear model between DBH and SLA
+model1 <- lm(SLA ~ DBH, data = tree_tidy)
+# Next linear model with categorial variable species added as a predictor
+model2 <- lm(SLA ~ DBH + species, data = tree_tidy)
+# Last linear model with DBH*species added as an interaction term
+model3 <- lm(SLA ~ DBH + species + DBH * species, data = tree_tidy)
+
+```
+
+After building models, fitted values (predictions) and resiuals were attached to cleaned tree_tidy data.
+
+```{r echo=TRUE}
+# Add predictions of all models to tree_tidy
+tree_tidy$pred1 <- model1$fitted.values
+tree_tidy$pred2 <- model2$fitted.values
+tree_tidy$pred3 <- model3$fitted.values
+
+# Add residuals of all models to tree_tidy
+tree_tidy$resid1 <- model1$residuals
+tree_tidy$resid2 <- model2$residuals
+tree_tidy$resid3 <- model3$residuals
+```
+
+## Comparison of models
+
+To compare the three models several different plots were created. First data was visualised with DBH at x-axis and
+SLA at y-axis:
+
+```{r echo=TRUE}
+qplot(DBH, SLA, data = tree_tidy, colour = species)
+```
+
+Then predictions of the three models were plotted against DBH at x-axis.
+
+```{r, echo=TRUE}
+qplot(DBH, pred1, data = tree_tidy, colour = species)
+qplot(DBH, pred2, data = tree_tidy, colour = species)
+qplot(DBH, pred3, data = tree_tidy, colour = species)
+```
+
+And finally residuals of the three models built were plotted against DBH at x-axis.
+
+```{r, echo=TRUE}
+qplot(DBH, resid1, data = tree_tidy, colour = species)
+qplot(DBH, resid1, data = tree_tidy, colour = species)
+qplot(DBH, resid1, data = tree_tidy, colour = species)
+```
+
+Model summaries were also examined.
+
+```{r, echo=TRUE}
+# Check model summaries
+summary(model1)
+summary(model2)
+summary(model3)
+```
+
+The clearest conclusion based on data is that bigger the DBH (the diameter) is, smaller the SLA gets. The correlation between DBH and SLA is therefore negative. Reasons to that may be diverse and as there is a correlation to be seen, it is not possible to explain the decrease of SLA with just DBH. There were also clear differences between three plant species as seen in models 2 and 3 described above. Further conclusion would be possible if more data was obtained. In example description of location of each plant instance would be helpful.
+
+Model3 from created models is the best one. That can be validated from plots as its residual plot is the most converged to zero. The residuals are best predictor of model goodness in this situation as it compares the real, observed values to the predicted values. The smaller the difference is, the better the model.
